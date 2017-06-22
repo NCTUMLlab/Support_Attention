@@ -23,5 +23,5 @@ trainer.train(data = data,
               support_data = support_context,
               val_data = val_data,
               epochs = 20,
-              pretrain_epochs = 20,
+              pretrain_epochs = 10,
               batch_size = 100)

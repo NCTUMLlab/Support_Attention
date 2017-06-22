@@ -155,3 +155,20 @@ class InitStateGen(object):
 		h = tf.nn.tanh(tf.matmul(feat_mean,self.w_h)+self.b_h)
 		c = tf.nn.tanh(tf.matmul(feat_mean,self.w_c)+self.b_c)
 		return c,h
+
+class BatchNorm(object):
+	def __init__(self,name = None):
+		self.name = name
+	def __call__(self,input_tensor, mode = 'train'):
+		if mode == 'train':
+			is_training = True
+			reuse = None
+		else:
+			is_training = False
+			reuse = True
+		
+		return tf.contrib.layers.batch_norm(inputs = input_tensor,
+											is_training = is_training,
+											updates_collections=None,
+											reuse = reuse,
+											scope = self.name)

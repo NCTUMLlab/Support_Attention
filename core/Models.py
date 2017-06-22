@@ -28,7 +28,8 @@ class Support_Attention_Model(object):
     def _build_variables(self):
         self.embedding = Embedding(self.voc_size,self.emb_dim,name = 'word_emb')
         self.feature_to_key = FeatureProj(self.input_feature_dim,self.input_feature_num,self.input_feature_dim,name='feature_proj')
-        
+        self.batch_norm = BatchNorm(name = 'batch_norm')
+
         self.beginner = InitStateGen(self.input_feature_dim,self.hidden_dim,name='beginner')
         self.controller_h1 = Attention(self.input_feature_dim,self.hidden_dim,self.input_feature_num,name='controller_h1')
 
@@ -43,8 +44,9 @@ class Support_Attention_Model(object):
         caption_out = self.captions[:,1:]
         mask = tf.to_float(tf.not_equal(caption_out,self._null))
         word_vec = self.embedding(caption_in) # (None,n_time_steps,emb_dim)
-        key = self.feature_to_key(self.img_feature) # (None,input_feature_num,input_feature_dim)
-        cell, state = self.beginner(self.img_feature) # (None,hidden_dim)
+        features = self.batch_norm(self.img_feature,'train')
+        key = self.feature_to_key(features) # (None,input_feature_num,input_feature_dim)
+        cell, state = self.beginner(features) # (None,hidden_dim)
 
         pred_loss = 0.0
         recon_loss = 0.0
@@ -52,7 +54,7 @@ class Support_Attention_Model(object):
         alpha_list = []
         for t in xrange(self.n_time_steps):
             # alpha=(None,input_feature_num), context=(None,input_feature_dim)
-            alpha,context = self.controller_h1(self.img_feature,key,state)
+            alpha,context = self.controller_h1(features,key,state)
             alpha_list.append(alpha)
 
             input_vec = tf.concat(axis = 1,values = [word_vec[:,t,:],context])
@@ -74,8 +76,9 @@ class Support_Attention_Model(object):
         alpha_list = []
         batch_size = tf.shape(self.img_feature)[0]
 
-        cell, state = self.beginner(self.img_feature)
-        key = self.feature_to_key(self.img_feature)
+        features = self.batch_norm(self.img_feature,'test')
+        cell, state = self.beginner(features)
+        key = self.feature_to_key(features)
 
         for t in xrange(self.n_time_steps):
             if t == 0:
@@ -83,7 +86,7 @@ class Support_Attention_Model(object):
             else:
                 x = self.embedding(sample_word)
 
-            alpha,context = self.controller_h1(self.img_feature,key,state)
+            alpha,context = self.controller_h1(features,key,state)
             alpha_list.append(alpha)
 
             input_vec = tf.concat(axis = 1,values = [x,context])
