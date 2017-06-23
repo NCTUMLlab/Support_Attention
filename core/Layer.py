@@ -168,7 +168,7 @@ class BatchNorm(object):
 			reuse = True
 		
 		return tf.contrib.layers.batch_norm(inputs = input_tensor,
-											is_training = is_training,
-											updates_collections=None,
-											reuse = reuse,
-											scope = self.name)
+						    is_training = is_training,
+						    updates_collections=None,
+						    reuse = reuse,
+						    scope = self.name)
