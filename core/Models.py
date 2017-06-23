@@ -15,6 +15,7 @@ class Support_Attention_Model(object):
         self.n_time_steps = n_time_steps
         self._start = word_to_idx['<START>']
         self._null = word_to_idx['<NULL>']
+        self.loss_weight = (1,1e-3)
 
         self._build_input()
         self._build_variables()
@@ -31,7 +32,7 @@ class Support_Attention_Model(object):
         self.batch_norm = BatchNorm(name = 'batch_norm')
 
         self.beginner = InitStateGen(self.input_feature_dim,self.hidden_dim,name='beginner')
-        self.controller_h1 = Attention(self.input_feature_dim,self.hidden_dim,self.input_feature_num,name='controller_h1')
+        self.controller_h1 = Attention_Product(self.input_feature_dim,self.hidden_dim,self.input_feature_num,name='controller_h1')
 
         self.decoder_h1 = LSTM(self.emb_dim+self.input_feature_dim,self.hidden_dim,activation=None,name='decoder_h1')
         self.decoder_h2 = Dense(self.hidden_dim,self.voc_size,activation=None,name = 'decoder_h2')
@@ -67,7 +68,7 @@ class Support_Attention_Model(object):
             recon_loss += tf.reduce_sum(tf.squared_difference(self.support_context[:,t,:],recon))
             pred_loss += tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logit,labels=caption_out[:,t])*mask[:,t])
 
-        self.loss = recon_loss+pred_loss
+        self.loss = self.loss_weight[0]*recon_loss+self.loss_weight[1]*pred_loss
         self.pretrain_loss = recon_loss
 
 

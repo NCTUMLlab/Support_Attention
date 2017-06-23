@@ -7,7 +7,7 @@ from core.utils import *
 from core.Models import *
 from core.Trainer import *
 
-support_context = np.load('data/context/context_model_19.npy')
+support_context = np.load('data/context/context_model_19_len16.npy')
 data = load_coco_data(data_path = './data', split='train')
 val_data = load_coco_data(data_path = './data', split='val')
 word_to_idx = data['word_to_idx']
