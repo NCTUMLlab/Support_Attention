@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 def get_weight(shape,name=None,initializer=tf.contrib.layers.xavier_initializer()):
     return tf.get_variable(name=name,shape=shape,initializer=initializer)
@@ -139,8 +140,8 @@ class Attention_Product(object):
     def __call__(self,value,key,hidden_state):
         h_att = tf.nn.relu(tf.matmul(hidden_state,self.w)+self.b)
         match = tf.reduce_sum(tf.multiply(tf.expand_dims(h_att,axis=1),key),axis=2)
-        match = tf.divide(match,self.data_dim)
-        alpha = tf.nn.softmax(match)
+        match = tf.divide(match,np.sqrt(self.data_dim))
+        alpha = tf.nn.sigmoid(match)
         context = tf.reduce_sum(value*tf.expand_dims(alpha,2),1,name = 'context')
         return alpha, context
 

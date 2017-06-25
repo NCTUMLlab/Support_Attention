@@ -15,7 +15,7 @@ class Support_Attention_Model(object):
         self.n_time_steps = n_time_steps
         self._start = word_to_idx['<START>']
         self._null = word_to_idx['<NULL>']
-        self.loss_weight = (1,1e-3)
+        self.loss_weight = (1,1e-1)
 
         self._build_input()
         self._build_variables()
