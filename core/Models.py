@@ -32,7 +32,7 @@ class Support_Attention_Model(object):
         self.batch_norm = BatchNorm(name = 'batch_norm')
 
         self.beginner = InitStateGen(self.input_feature_dim,self.hidden_dim,name='beginner')
-        self.controller_h1 = Attention_Product(self.input_feature_dim,self.hidden_dim,self.input_feature_num,name='controller_h1')
+        self.controller_h1 = Attention(self.input_feature_dim,self.hidden_dim,self.input_feature_num,name='controller_h1')
 
         self.decoder_h1 = LSTM(self.emb_dim+self.input_feature_dim,self.hidden_dim,activation=None,name='decoder_h1')
         self.decoder_h2 = Dense(self.hidden_dim,self.voc_size,activation=None,name = 'decoder_h2')

@@ -120,12 +120,18 @@ class Attention(object):
             self.w = get_weight([state_dim,data_dim],name='attention_weight')
             self.b = get_bias([data_dim],name = 'attention_bias')
             self.w_att = get_weight([data_dim,1],name='attention_output')
+            self.w_sec = get_weight([state_dim,1],name='w_sec')
+            self.b_sec = get_bias([1],name='b_sec')
 
     def __call__(self,value,key,hidden_state):
         h_att = tf.nn.relu(key+tf.expand_dims(tf.matmul(hidden_state,self.w),1)+self.b)
         out_att = tf.reshape(tf.matmul(tf.reshape(h_att,[-1,self.data_dim]),self.w_att),[-1,self.data_num])
         alpha = tf.nn.softmax(out_att)
         context = tf.reduce_sum(value*tf.expand_dims(alpha,2),1,name = 'context')
+
+        beta = tf.nn.sigmoid(tf.matmul(hidden_state,self.w_sec)+self.b_sec)
+        context = tf.multiply(beta,context,name='sector_context')
+
         return alpha, context
 
 class Attention_Product(object):
@@ -136,11 +142,19 @@ class Attention_Product(object):
             self.data_num = data_num
             self.w = get_weight([state_dim,data_dim],name='attention_weight')
             self.b = get_bias([data_dim],name = 'attention_bias')
+            self.w_att_h1 = get_weight([data_num,data_num],name='output_attention')
+            self.b_att_h1 = get_bias([data_num],name='bias_attention_output')
+            self.w_att_h2 = get_weight([data_num,data_num],name='output_attention_h2')
+            self.b_att_h2 = get_bias([data_num],name='bias_attetion_output_h2')
 
     def __call__(self,value,key,hidden_state):
         h_att = tf.nn.relu(tf.matmul(hidden_state,self.w)+self.b)
         match = tf.reduce_sum(tf.multiply(tf.expand_dims(h_att,axis=1),key),axis=2)
-        match = tf.divide(match,np.sqrt(self.data_dim))
+        match = tf.divide(match,self.data_dim)
+        match = tf.matmul(match,self.w_att_h1)+self.b_att_h1
+        match = tf.nn.softplus(match)
+        match = tf.matmul(match,self.w_att_h2)+self.b_att_h2
+        match = tf.nn.softplus(match)
         alpha = tf.nn.sigmoid(match)
         context = tf.reduce_sum(value*tf.expand_dims(alpha,2),1,name = 'context')
         return alpha, context
