@@ -72,10 +72,10 @@ class Trainer(object):
                     else:
                         end = (itr+1)*batch_size
                     caption_batch = captions[start:end]
+                    support_data_batch = support_data[start:end]
                     image_idx_batch = image_idx[start:end]
                     features_batch = features[image_idx_batch]
-                    support_data_batch = support_data[image_idx_batch][:,:self.model.n_time_steps]
-                    
+                                        
                     feed_dict={
                         self.model.img_feature:features_batch,
                         self.model.support_context:support_data_batch,
@@ -112,7 +112,7 @@ class Trainer(object):
                     caption_batch = captions[start:end]
                     image_idx_batch = image_idx[start:end]
                     features_batch = features[image_idx_batch]
-                    support_data_batch = support_data[image_idx_batch][:,:self.model.n_time_steps]
+                    support_data_batch = support_data[start:end]
 
                     feed_dict = {
                         self.model.img_feature:features_batch,
