@@ -63,6 +63,7 @@ class Trainer(object):
                 pre_ep_start = time.time()
                 rand_idxs = np.random.permutation(n_example)
                 captions = captions[rand_idxs]
+                support_data = support_data[rand_idxs]
                 image_idx = image_idx[rand_idxs]
                 pretrain_cost = 0.
                 for itr in xrange(n_batch):
@@ -101,6 +102,7 @@ class Trainer(object):
                 ep_start = time.time()
                 rand_idxs = np.random.permutation(n_example)
                 captions = captions[rand_idxs]
+                support_data = support_data[rand_idxs]
                 image_idx = image_idx[rand_idxs]
 
                 for itr in xrange(n_batch):
