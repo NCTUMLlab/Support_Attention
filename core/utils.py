@@ -72,9 +72,9 @@ def write_bleu(scores, path, epoch):
         f.write('Bleu_2: %f\n' %scores['Bleu_2'])
         f.write('Bleu_3: %f\n' %scores['Bleu_3'])  
         f.write('Bleu_4: %f\n' %scores['Bleu_4']) 
-        f.write('METEOR: %f\n' %scores['METEOR'])  
-        f.write('ROUGE_L: %f\n' %scores['ROUGE_L'])  
-        f.write('CIDEr: %f\n\n' %scores['CIDEr'])
+        #f.write('METEOR: %f\n' %scores['METEOR'])  
+        #f.write('ROUGE_L: %f\n' %scores['ROUGE_L'])  
+        #f.write('CIDEr: %f\n\n' %scores['CIDEr'])
 
 def load_pickle(path):
     with open(path, 'rb') as f:

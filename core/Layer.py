@@ -142,21 +142,24 @@ class Attention_Product(object):
             self.data_num = data_num
             self.w = get_weight([state_dim,data_dim],name='attention_weight')
             self.b = get_bias([data_dim],name = 'attention_bias')
-            self.w_att_h1 = get_weight([data_num,data_num],name='output_attention')
-            self.b_att_h1 = get_bias([data_num],name='bias_attention_output')
-            self.w_att_h2 = get_weight([data_num,data_num],name='output_attention_h2')
+            self.w_att_h1 = get_weight([data_num,512],name='output_attention')
+            self.b_att_h1 = get_bias([512],name='bias_attention_output')
+            self.w_att_h2 = get_weight([512,data_num],name='output_attention_h2')
             self.b_att_h2 = get_bias([data_num],name='bias_attetion_output_h2')
+            self.w_gate = get_weight([state_dim,1],name='w_gate')
+            self.b_gate = get_bias([1],name='b_gate')
 
     def __call__(self,value,key,hidden_state):
         h_att = tf.nn.relu(tf.matmul(hidden_state,self.w)+self.b)
         match = tf.reduce_sum(tf.multiply(tf.expand_dims(h_att,axis=1),key),axis=2)
         match = tf.divide(match,self.data_dim)
         match = tf.matmul(match,self.w_att_h1)+self.b_att_h1
-        match = tf.nn.softplus(match)
+        match = tf.nn.sigmoid(match)
         match = tf.matmul(match,self.w_att_h2)+self.b_att_h2
-        match = tf.nn.softplus(match)
-        alpha = tf.nn.sigmoid(match)
+        alpha = tf.nn.softmax(match)
+        im_hid_gate = tf.nn.sigmoid(tf.matmul(hidden_state,self.w_gate)+self.b_gate)
         context = tf.reduce_sum(value*tf.expand_dims(alpha,2),1,name = 'context')
+        context = tf.multiply(im_hid_gate,context)
         return alpha, context
 
 class FeatureProj(object):
@@ -194,7 +197,7 @@ class BatchNorm(object):
     def __call__(self,input_tensor, mode = 'train'):
         if mode == 'train':
             is_training = True
-            reuse = None
+            reuse = False
         else:
             is_training = False
             reuse = True

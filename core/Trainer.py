@@ -3,6 +3,7 @@ from __future__ import print_function
 import tensorflow as tf
 import numpy as np
 import time
+from tqdm import tqdm
 
 from utils import *
 from bleu import evaluate
@@ -62,19 +63,20 @@ class Trainer(object):
             for pre_ep in xrange(pretrain_epochs):
                 pre_ep_start = time.time()
                 rand_idxs = np.random.permutation(n_example)
-                captions = captions[rand_idxs]
-                support_data = support_data[rand_idxs]
-                image_idx = image_idx[rand_idxs]
+                #captions = captions[rand_idxs]
+                #support_data = support_data[rand_idxs]
+                #image_idx = image_idx[rand_idxs]
                 pretrain_cost = 0.
-                for itr in xrange(n_batch):
+                for itr in tqdm(xrange(n_batch),desc='Pretrain Epoch:%d'%(pre_ep+1)):
                     start = itr*batch_size
                     if (itr+1)*batch_size>n_example:
                         end = n_example
                     else:
                         end = (itr+1)*batch_size
-                    caption_batch = captions[start:end]
-                    support_data_batch = support_data[start:end]
-                    image_idx_batch = image_idx[start:end]
+		    rand_idxs_batch = rand_idxs[start:end]
+                    caption_batch = captions[rand_idxs_batch]
+                    support_data_batch = support_data[rand_idxs_batch]
+                    image_idx_batch = image_idx[rand_idxs_batch]
                     features_batch = features[image_idx_batch]
                                         
                     feed_dict={
@@ -101,20 +103,21 @@ class Trainer(object):
                 train_cost=0.
                 ep_start = time.time()
                 rand_idxs = np.random.permutation(n_example)
-                captions = captions[rand_idxs]
-                support_data = support_data[rand_idxs]
-                image_idx = image_idx[rand_idxs]
+                #captions = captions[rand_idxs]
+                #support_data = support_data[rand_idxs]
+                #image_idx = image_idx[rand_idxs]
 
-                for itr in xrange(n_batch):
+                for itr in tqdm(xrange(n_batch),desc='Epoch:%d'%(ep+1)):
                     start = itr*batch_size
                     if (itr+1)*batch_size>n_example:
                         end = n_example
                     else:
                         end = (itr+1)*batch_size
-                    caption_batch = captions[start:end]
-                    image_idx_batch = image_idx[start:end]
+	            rand_idxs_batch = rand_idxs[start:end]
+                    caption_batch = captions[rand_idxs_batch]
+                    image_idx_batch = image_idx[rand_idxs_batch]
                     features_batch = features[image_idx_batch]
-                    support_data_batch = support_data[start:end]
+                    support_data_batch = support_data[rand_idxs_batch]
 
                     feed_dict = {
                         self.model.img_feature:features_batch,

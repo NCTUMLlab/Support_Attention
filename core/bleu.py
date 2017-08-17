@@ -9,10 +9,10 @@ from pycocoevalcap.meteor.meteor import Meteor
 
 def score(ref, hypo):
     scorers = [
-        (Bleu(4),["Bleu_1","Bleu_2","Bleu_3","Bleu_4"]),
-        (Meteor(),"METEOR"),
-        (Rouge(),"ROUGE_L"),
-        (Cider(),"CIDEr")
+        (Bleu(4),["Bleu_1","Bleu_2","Bleu_3","Bleu_4"])#,
+        #(Meteor(),"METEOR"),
+        #(Rouge(),"ROUGE_L"),
+        #(Cider(),"CIDEr")
     ]
     final_scores = {}
     for scorer,method in scorers:
@@ -49,9 +49,9 @@ def evaluate(data_path='./data', split='val', get_scores=False):
     print 'Bleu_2:\t',final_scores['Bleu_2']  
     print 'Bleu_3:\t',final_scores['Bleu_3']  
     print 'Bleu_4:\t',final_scores['Bleu_4']  
-    print 'METEOR:\t',final_scores['METEOR']  
-    print 'ROUGE_L:',final_scores['ROUGE_L']  
-    print 'CIDEr:\t',final_scores['CIDEr']
+    #print 'METEOR:\t',final_scores['METEOR']  
+    #print 'ROUGE_L:',final_scores['ROUGE_L']  
+    #print 'CIDEr:\t',final_scores['CIDEr']
     
     if get_scores:
         return final_scores

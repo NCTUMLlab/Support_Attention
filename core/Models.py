@@ -15,7 +15,8 @@ class Support_Attention_Model(object):
         self.n_time_steps = n_time_steps
         self._start = word_to_idx['<START>']
         self._null = word_to_idx['<NULL>']
-        self.loss_weight = (1,1e-1)
+        self.loss_weight = (1,1)
+        self.alpha_c = 1.0
 
         self._build_input()
         self._build_variables()
@@ -37,8 +38,8 @@ class Support_Attention_Model(object):
         self.decoder_h1 = LSTM(self.emb_dim+self.input_feature_dim,self.hidden_dim,activation=None,name='decoder_h1')
         self.decoder_h2 = Dense(self.hidden_dim,self.voc_size,activation=None,name = 'decoder_h2')
         
-        self.reconstructer_h1 = Dense(self.input_feature_dim,256,activation=tf.nn.relu,name = 'reconstructer')
-        self.reconstructer_h2 = Dense(256,self.input_feature_dim,activation=None,name = 'reconstructer_h2')
+        self.reconstructer_h1 = Dense(self.input_feature_dim,512,activation=tf.nn.relu,name = 'reconstructer')
+        self.reconstructer_h2 = Dense(512,self.input_feature_dim,activation=None,name = 'reconstructer_h2')
     
     def _build_model(self):
         caption_in = self.captions[:,:self.n_time_steps]
@@ -48,6 +49,8 @@ class Support_Attention_Model(object):
         features = self.batch_norm(self.img_feature,'train')
         key = self.feature_to_key(features) # (None,input_feature_num,input_feature_dim)
         cell, state = self.beginner(features) # (None,hidden_dim)
+        cell = tf.nn.dropout(cell,0.5)
+        state = tf.nn.dropout(state,0.5)
 
         pred_loss = 0.0
         recon_loss = 0.0
@@ -60,6 +63,8 @@ class Support_Attention_Model(object):
 
             input_vec = tf.concat(axis = 1,values = [word_vec[:,t,:],context])
             state,cell = self.decoder_h1(input_vec,state,cell)
+            cell = tf.nn.dropout(cell,0.5)
+            state = tf.nn.dropout(state,0.5)
             logit = self.decoder_h2(state)
 
             recon = self.reconstructer_h1(context)
@@ -68,8 +73,12 @@ class Support_Attention_Model(object):
             recon_loss += tf.reduce_sum(tf.squared_difference(self.support_context[:,t,:],recon))
             pred_loss += tf.reduce_sum(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logit,labels=caption_out[:,t])*mask[:,t])
 
-        self.loss = self.loss_weight[0]*recon_loss+self.loss_weight[1]*pred_loss
-        self.pretrain_loss = recon_loss
+        if self.alpha_c > 0:
+            alphas = tf.transpose(tf.stack(alpha_list),(1,0,2))
+            alphas_all = tf.reduce_sum(alphas,1)
+            alphas_reg = self.alpha_c*tf.reduce_sum((16./196-alphas_all)**2)
+        self.loss = self.loss_weight[0]*recon_loss+self.loss_weight[1]*pred_loss+alphas_reg
+        self.pretrain_loss = recon_loss+alphas_reg
 
 
     def build_sampler(self):
