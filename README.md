@@ -21,6 +21,3 @@ We evalute this model on MS-COCO Caption dataset
 - Example
 <img src='figs/im_caption_4.png' width=50%>
 
-## Reference
-Another tensorflow implementation: https://github.com/yunjey/show-attend-and-tell
-
