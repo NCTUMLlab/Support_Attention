@@ -2,7 +2,7 @@
 In this project, we introduce Supporting Attention into Memory Network.
 We evalute this model on MS-COCO Caption dataset
 
-<img src'figs/model.png' width=50%>
+<img src='figs/model.png' width=50%>
 
 ## Setting 
 - Hardware:
