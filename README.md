@@ -2,7 +2,7 @@
 In this project, we introduce Supporting Attention into Memory Network.
 We evalute this model on MS-COCO Caption dataset
 
-<img src='figs/model.png' width=50%>
+<img src='figs/model.PNG' width=50%>
 
 ## Setting 
 - Hardware:
@@ -16,7 +16,7 @@ We evalute this model on MS-COCO Caption dataset
 
 ## Result
 - BLEU scores 
-<img src='figs/table.png'>
+<img src='figs/table.PNG'>
 
 - Example
 <img src='figs/im_caption_4.png' width=50%>
